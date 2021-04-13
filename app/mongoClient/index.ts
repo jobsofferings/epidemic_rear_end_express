@@ -1,7 +1,7 @@
 const MongoClient = require('mongoose');
 
 const db = MongoClient.connection;
-const connectAddress = 'mongodb://134.175.103.75:27017/coco';
+const connectAddress = 'mongodb://134.175.103.75:27017/epidemic';
 const connectProps = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -9,8 +9,8 @@ const connectProps = {
   useFindAndModify: true,
   authSource: "admin",
   auth: {
-    user: 'coco',
-    password: 'ithinkso123!',
+    user: 'epidemic',
+    password: '12345678',
   }
 }
 
