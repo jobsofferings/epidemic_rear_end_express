@@ -20,5 +20,38 @@ const ChinaDayListSchema = new Schema({
 });
 const ChinaDayList = mongoose.model("china", ChinaDayListSchema);
 
+const ChinaDayAddListSchema = new Schema({
+  localinfectionadd: { type: Number },
+  localConfirmadd: { type: Number },
+  deadRate: { type: String },
+  suspect: { type: Number },
+  dead: { type: Number },
+  infect: { type: Number },
+  healRate: { type: String },
+  date: { type: String },
+  y: { type: String },
+  confirm: { type: Number },
+  heal: { type: Number },
+  importedCase: { type: Number },
+});
+const ChinaDayAddList = mongoose.model("chinaDayAdd", ChinaDayAddListSchema);
 
-export { ChinaDayList }
+const ProvinceCompareSchema = new Schema({
+  heal: { type: Number },
+  zero: { type: Number },
+  nowConfirm: { type: Number },
+  confirmAdd: { type: Number },
+  dead: { type: Number },
+});
+const ProvinceCompare = mongoose.model("province", ProvinceCompareSchema);
+
+const ForeignListSchema = new Schema({
+  heal: { type: Number },
+  zero: { type: Number },
+  nowConfirm: { type: Number },
+  confirmAdd: { type: Number },
+  dead: { type: Number },
+});
+const ForeignList = mongoose.model("foreignList", ForeignListSchema);
+
+export { ChinaDayList, ProvinceCompare, ChinaDayAddList, ForeignList }
