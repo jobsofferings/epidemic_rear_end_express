@@ -46,11 +46,21 @@ const ProvinceCompareSchema = new Schema({
 const ProvinceCompare = mongoose.model("province", ProvinceCompareSchema);
 
 const ForeignListSchema = new Schema({
-  heal: { type: Number },
-  zero: { type: Number },
-  nowConfirm: { type: Number },
+  name: { type: String },
+  continent: { type: String },
+  y: { type: String },
+  date: { type: String },
   confirmAdd: { type: Number },
+  confirmAddCut: { type: Number },
+  confirm: { type: Number },
+  suspect: { type: Number },
   dead: { type: Number },
+  heal: { type: Number },
+  nowConfirm: { type: Number },
+  confirmCompare: { type: Number },
+  nowConfirmCompare: { type: Number },
+  healCompare: { type: Number },
+  deadCompare: { type: Number }
 });
 const ForeignList = mongoose.model("foreignList", ForeignListSchema);
 

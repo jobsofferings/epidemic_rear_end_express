@@ -49,14 +49,12 @@ request('https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?mod
   });
 })
 
-
-
 /**
  * foreign
  */
-request('https://api.inews.qq.com/newsqa/v1/automation/modules/list?modules=FAutoforeignList', (error: any, response: any, body: any) => {
+request('https://api.inews.qq.com/newsqa/v1/automation/foreign/country/ranklist', (error: any, response: any, body: any) => {
   console.info("获取ForeignList数据成功")
-  const data = JSON.parse(body).data.FAutoforeignList;
+  const data = JSON.parse(body).data;
   const list = Array.isArray(data) ? data : [];
   ForeignList.deleteMany({}, {}, function (err: any) {
     console.info("清除ForeignList数据成功")

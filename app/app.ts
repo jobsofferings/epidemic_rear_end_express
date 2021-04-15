@@ -3,7 +3,7 @@ import path from 'path';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import mongoClient from './mongoClient/index';
-import { ChinaDayAddList, ChinaDayList } from "./reptile/Schema";
+import { ChinaDayAddList, ChinaDayList, CountryConfirmAdd, ForeignList } from "./reptile/Schema";
 
 const app: express.Application = express();
 const port = 5000;
@@ -37,6 +37,15 @@ app.post("/getChinaDayAddList", (req, res) => {
   ChinaDayAddList.find(where, set, {}, function (err: any, results: any) {
     res.json(results)
   });
+})
+
+app.post("/getCountryConfirm", (req, res) => {
+  const { id } = req.body
+  const where = {};
+  const set = { _id: 0, __v: 0 };
+  ForeignList.find(where, set, { limit: 10, sort: [[['confirm', -1]]] }, function (err: any, results: any[]) {
+    res.json(results);
+  })
 })
 
 app.use((error: Error, req: any, res: any, next: Function) => {
