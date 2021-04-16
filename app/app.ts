@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import mongoClient from './mongoClient/index';
 import { ChinaDayAddList, ChinaDayList, ForeignList } from "./reptile/Schema";
+import request from 'request';
 
 const app: express.Application = express();
 const port = 5000;
@@ -47,6 +48,17 @@ app.post("/getCountryConfirm", (req, res) => {
   ForeignList.find(where, set, { limit, sort: [[['confirm', -1]]] }, function (err: any, results: any[]) {
     res.json(results);
   })
+})
+
+app.post("/getInfoByCountry", (req, res) => {
+  const { country } = req.body
+  if (country) {
+    request(`https://api.inews.qq.com/newsqa/v1/automation/foreign/daily/list?country=${encodeURI(country)}`, (error: any, response: any, body: any) => {
+      res.json(JSON.parse(body).data)
+    })
+  } else {
+    res.json([])
+  }
 })
 
 app.post("/countryAnddContinent", (req, res) => {
