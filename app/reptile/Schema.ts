@@ -37,11 +37,9 @@ const ChinaDayAddListSchema = new Schema({
 const ChinaDayAddList = mongoose.model("chinaDayAdd", ChinaDayAddListSchema);
 
 const ProvinceCompareSchema = new Schema({
-  heal: { type: Number },
-  zero: { type: Number },
-  nowConfirm: { type: Number },
-  confirmAdd: { type: Number },
-  dead: { type: Number },
+  province: { type: String },
+  confirm: { type: Number },
+  increase: { type: Number },
 });
 const ProvinceCompare = mongoose.model("province", ProvinceCompareSchema);
 

@@ -1,6 +1,7 @@
 import mongoClient from '../mongoClient/index';
 import { ChinaDayList, ProvinceCompare, ChinaDayAddList, ForeignList } from "./Schema";
 import request from 'request';
+import { DEFAULT_PROVINCE, OverwriteDatabase } from '../config';
 
 mongoClient
 
@@ -8,45 +9,31 @@ request('https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?mod
   console.info("获取ChinaDayList数据成功")
   const data = JSON.parse(body).data.chinaDayList;
   const list = Array.isArray(data) ? data : [];
-  ChinaDayList.deleteMany({}, {}, function (err: any) {
-    console.info("清除ChinaDayList数据成功")
-    ChinaDayList.create(list, (err: any, res: any) => {
-      if (!err) {
-        console.info(`ChinaDayList: ${list.length}个文档更新成功`)
-      }
-    })
-  });
+  OverwriteDatabase(ChinaDayList, list, 'ChinaDayList')
 })
 
 request('https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?modules=chinaDayAddList', (error: any, response: any, body: any) => {
   console.info("获取ChinaDayAddList数据成功")
   const data = JSON.parse(body).data.chinaDayAddList;
   const list = Array.isArray(data) ? data : [];
-  ChinaDayAddList.deleteMany({}, {}, function (err: any) {
-    console.info("清除ChinaDayAddList数据成功")
-    ChinaDayAddList.create(list, (err: any, res: any) => {
-      if (!err) {
-        console.info(`ChinaDayAddList: ${list.length}个文档更新成功`)
-      }
-    })
-  });
+  OverwriteDatabase(ChinaDayAddList, list, 'ChinaDayAddList')
 })
 
-request('https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?modules=provinceCompare', (error: any, response: any, body: any) => {
+request('https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?modules=asymptomaticProvince', (error: any, response: any, body: any) => {
   console.info("获取provinceCompare数据成功")
-  const data = JSON.parse(body).data.provinceCompare;
-  const list = Object.keys(data).map(province => ({
-    ...data[province],
-    province
-  }));
-  ProvinceCompare.deleteMany({}, {}, function (err: any) {
-    console.info("清除provinceCompare数据成功")
-    ProvinceCompare.create(list, (err: any, res: any) => {
-      if (!err) {
-        console.info(`provinceCompare: ${list.length}个文档更新成功`)
+  const data = JSON.parse(body).data.asymptomaticProvince.confirm;
+  const list = Array.isArray(data) ? data : [];
+  const resData: any[] = []
+  for (let provinceData of DEFAULT_PROVINCE) {
+    let needAssignData;
+    for (let item of list) {
+      if (item.province === provinceData.province) {
+        needAssignData = item;
       }
-    })
-  });
+    }
+    resData.push(Object.assign(provinceData, needAssignData || { confirm: 0, province: provinceData.province, increase: 0 }))
+  }
+  OverwriteDatabase(ProvinceCompare, resData, 'ProvinceCompare')
 })
 
 /**
@@ -56,12 +43,6 @@ request('https://api.inews.qq.com/newsqa/v1/automation/foreign/country/ranklist'
   console.info("获取ForeignList数据成功")
   const data = JSON.parse(body).data;
   const list = Array.isArray(data) ? data : [];
-  ForeignList.deleteMany({}, {}, function (err: any) {
-    console.info("清除ForeignList数据成功")
-    ForeignList.create(list, (err: any, res: any) => {
-      if (!err) {
-        console.info(`ForeignList: ${list.length}个文档更新成功`)
-      }
-    })
-  });
+  OverwriteDatabase(ForeignList, list, 'ForeignList')
 })
+
