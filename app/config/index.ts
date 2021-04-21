@@ -47,3 +47,40 @@ export function OverwriteDatabase(schema: mongoose.Model<any, any>, data: any[],
     })
   });
 }
+
+export const getPredictedNumber = (xList: number[], yList: number[], x: number) => {
+  let alpha = 0.00001
+  let m = 7
+  let ftheta0 = 0
+  let ftheta1 = 0
+  let error0 = 0
+  let error1 = 0
+  let epsilon = 0.000001
+  const f = (xList: number) => ftheta1 * xList + ftheta0
+  let fresult0 = []
+  let fresult1 = []
+  let isEnd = false;
+  while (!isEnd) {
+    let diff = [0, 0]
+    for (let i = 0; i < m; i++) {
+      diff[0] += f(xList[i]) - yList[i]
+      diff[1] += (f(xList[i]) - yList[i]) * xList[i]
+    }
+    ftheta0 = ftheta0 - alpha / m * diff[0]
+    ftheta1 = ftheta1 - alpha / m * diff[1]
+    fresult0.push(ftheta0)
+    fresult1.push(ftheta1)
+    error1 = 0
+    for (let i = 0; i < xList.length; i++) {
+      error1 += (yList[i] - (ftheta0 + ftheta1 * xList[i])) ** 2 / 2
+    }
+    if (Math.abs(error1 - error0) < epsilon) {
+      isEnd = true;
+    } else {
+      error0 = error1
+    }
+  }
+  return x * ftheta1 + ftheta0;
+}
+
+export const formatNumber = (num: number) => `${num < 10 ? '0' : ''}${num}`

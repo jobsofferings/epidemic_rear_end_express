@@ -103,7 +103,7 @@ app.post("/getChinaDayList", (req, res) => {
 app.post("/getChinaDayAddList", (req, res) => {
   const where = {};
   const set = { _id: 0, __v: 0 };
-  ChinaDayAddList.find(where, set, {}, function (err: any, results: any) {
+  ChinaDayAddList.find(where, set, { sort: [[['time', 1]]] }, function (err: any, results: any) {
     res.json(results)
   });
 })

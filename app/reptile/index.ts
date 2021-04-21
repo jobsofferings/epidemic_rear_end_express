@@ -1,7 +1,8 @@
 import mongoClient from '../mongoClient/index';
 import { ChinaDayList, ProvinceCompare, ChinaDayAddList, ForeignList } from "./Schema";
 import request from 'request';
-import { DEFAULT_PROVINCE, OverwriteDatabase } from '../config';
+import { DEFAULT_PROVINCE, formatNumber, getPredictedNumber, OverwriteDatabase } from '../config';
+import moment, { Moment } from 'moment';
 
 mongoClient
 
@@ -16,7 +17,43 @@ request('https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?mod
   console.info("获取ChinaDayAddList数据成功")
   const data = JSON.parse(body).data.chinaDayAddList;
   const list = Array.isArray(data) ? data : [];
-  OverwriteDatabase(ChinaDayAddList, list, 'ChinaDayAddList')
+  const listFormat = list.map(item => {
+    return {
+      ...item,
+      moment: moment(moment()).diff(moment(`${item.date}-${item.y}`, "MM.DD-YYYY"), 'day'),
+      time: new Date(`${item.y}-${item.date}`).getTime()
+    }
+  }).sort((a, b) => - a.moment + b.moment)
+  console.info("ChinaDayAddList 预测开始")
+  const predictedList = [];
+  predictedList.push(getPredictItem(
+    moment(),
+    listFormat[listFormat.length - 1].moment - 1,
+  ))
+  predictedList.push(getPredictItem(
+    moment().add(1, 'days'),
+    listFormat[listFormat.length - 1].moment - 2,
+  ))
+  function getPredictItem(time: Moment, moment: number) {
+    return {
+      confirm: Math.abs(Math.floor(getPredictedNumber(
+        listFormat.map(({ moment }) => moment),
+        listFormat.map(({ confirm }) => confirm),
+        moment,
+      ))),
+      heal: Math.abs(Math.floor(getPredictedNumber(
+        listFormat.map(({ moment }) => moment),
+        listFormat.map(({ heal }) => heal),
+        moment,
+      ))),
+      moment: moment,
+      time: time.startOf('day').valueOf(),
+      y: time.year(),
+      date: `${formatNumber(time.month() + 1)}.${formatNumber(time.date())}`,
+    }
+  }
+  console.info("ChinaDayAddList 预测结束")
+  OverwriteDatabase(ChinaDayAddList, listFormat.concat(predictedList), 'ChinaDayAddList')
 })
 
 request('https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?modules=asymptomaticProvince', (error: any, response: any, body: any) => {

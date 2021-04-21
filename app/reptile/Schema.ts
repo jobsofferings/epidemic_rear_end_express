@@ -33,6 +33,8 @@ const ChinaDayAddListSchema = new Schema({
   confirm: { type: Number },
   heal: { type: Number },
   importedCase: { type: Number },
+  moment: { type: Number },
+  time: { type: Number },
 });
 const ChinaDayAddList = mongoose.model("chinaDayAdd", ChinaDayAddListSchema);
 
