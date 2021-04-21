@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import mongoClient from './mongoClient/index';
 import { ChinaDayAddList, ChinaDayList, ForeignList, ProvinceCompare } from "./reptile/Schema";
+import { User } from './reptile/UserSchema';
 import request from 'request';
 
 const app: express.Application = express();
@@ -23,6 +24,73 @@ app.use(express.static(path.join(__dirname, 'upload')));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+app.post("/login", (req, res) => {
+  const { email, password } = req.body
+  const where = { email, password };
+  const set = { _id: 0, __v: 0 };
+  User.find(where, set, {}, function (err: any, results: any) {
+    const { username }: any = results[0] || {};
+    if (username) {
+      res.json({
+        flag: true,
+        msg: '登录成功',
+        user: {
+          username,
+          email,
+        },
+      })
+    } else {
+      res.json({
+        flag: false,
+        msg: '登录失败，请重新输入密码',
+        user: {
+          username: '',
+          email: '',
+        },
+      })
+    }
+  });
+})
+
+app.post("/sign", (req, res) => {
+  const { username, email, password } = req.body
+  if (!username && !email && !password) {
+    res.json({
+      flag: false,
+      msg: '请填写完整信息',
+      user: {
+        username,
+        email,
+      },
+    })
+  }
+  const where = { email };
+  const set = { _id: 0, __v: 0 };
+  User.find(where, set, {}, function (err: any, results: any) {
+    if (results.length) {
+      res.json({
+        flag: false,
+        msg: '该注册已注册',
+        user: {
+          username,
+          email,
+        },
+      })
+    } else {
+      User.create([{ username, email, password }], (err: any, results2: any) => {
+        res.json({
+          flag: true,
+          msg: '注册成功',
+          user: {
+            username,
+            email,
+          },
+        })
+      })
+    }
+  });
+})
 
 app.post("/getChinaDayList", (req, res) => {
   const where = {};
