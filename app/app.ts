@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import mongoClient from './mongoClient/index';
 import { ChinaDayAddList, ChinaDayList, ForeignList, ProvinceCompare } from "./reptile/Schema";
-import { User } from './reptile/UserSchema';
+import { Messages, User, MessageLike } from './reptile/UserSchema';
 import request from 'request';
 
 const app: express.Application = express();
@@ -86,6 +86,68 @@ app.post("/sign", (req, res) => {
             username,
             email,
           },
+        })
+      })
+    }
+  });
+})
+
+app.post("/getMessages", (req, res) => {
+  const { email } = req.body
+  const where = {};
+  const likeWhere = {};
+  const set = { __v: 0 };
+  const likeSet = { __v: 0 };
+  Messages.find(where, set, {}, function (err: any, results: any) {
+    MessageLike.find(likeWhere, likeSet, {}, function (err: any, results2: any) {
+      results = results.map((item: any) => {
+        let isActive = false;
+        let num = 0;
+        results2.forEach((item2: any) => {
+          if (item._id.toString() === item2.messageId && email === item2.email) {
+            isActive = true;
+          }
+          if (item._id.toString() === item2.messageId) {
+            num++;
+          }
+        })
+        return {
+          messageContent: item.messageContent,
+          time: item.time,
+          username: item.username,
+          _id: item._id,
+          isActive,
+          num,
+        }
+      })
+      res.json(results)
+    });
+  });
+})
+
+app.post("/messageLike", (req, res) => {
+  const { email, username, _id } = req.body
+  const where = { email, username, messageId: _id };
+  const set = { __v: 0 };
+  if (!email || !username || !_id) {
+    return res.json({
+      flag: false,
+      message: '系统错误',
+    })
+  }
+  MessageLike.find(where, set, {}, function (err: any, results: any) {
+    if (!results.length) {
+      MessageLike.create({ email, username, messageId: _id, time: new Date().getTime() }, (err: any, results2: any) => {
+        res.json({
+          flag: !err,
+          message: '点赞成功!',
+        })
+      })
+    } else {
+      MessageLike.remove({ email, username, messageId: _id }, (err: any) => {
+        res.json({
+          flag: !err,
+          message: '取消点赞成功!',
         })
       })
     }
