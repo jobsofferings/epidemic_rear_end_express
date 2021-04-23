@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import bodyParser from 'body-parser';
+import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import mongoClient from './mongoClient/index';
 import { ChinaDayAddList, ChinaDayList, ForeignList, ProvinceCompare } from "./reptile/Schema";
@@ -30,7 +31,7 @@ app.post("/login", (req, res) => {
   const where = { email, password };
   const set = { _id: 0, __v: 0 };
   User.find(where, set, {}, function (err: any, results: any) {
-    const { username }: any = results[0] || {};
+    const { username, authority }: any = results[0] || {};
     if (username) {
       res.json({
         flag: true,
@@ -38,6 +39,7 @@ app.post("/login", (req, res) => {
         user: {
           username,
           email,
+          authority
         },
       })
     } else {
@@ -47,6 +49,7 @@ app.post("/login", (req, res) => {
         user: {
           username: '',
           email: '',
+          authority: '',
         },
       })
     }
@@ -62,6 +65,7 @@ app.post("/sign", (req, res) => {
       user: {
         username,
         email,
+        authority: '',
       },
     })
   }
@@ -69,12 +73,14 @@ app.post("/sign", (req, res) => {
   const set = { _id: 0, __v: 0 };
   User.find(where, set, {}, function (err: any, results: any) {
     if (results.length) {
+      const { username, email, authority, } = results[0]
       res.json({
         flag: false,
         msg: '该注册已注册',
         user: {
           username,
           email,
+          authority,
         },
       })
     } else {
@@ -85,6 +91,7 @@ app.post("/sign", (req, res) => {
           user: {
             username,
             email,
+            authority: 'primary',
           },
         })
       })
@@ -98,7 +105,7 @@ app.post("/getMessages", (req, res) => {
   const likeWhere = {};
   const set = { __v: 0 };
   const likeSet = { __v: 0 };
-  Messages.find(where, set, {}, function (err: any, results: any) {
+  Messages.find(where, set, { sort: [[['time', -1]]] }, function (err: any, results: any) {
     MessageLike.find(likeWhere, likeSet, {}, function (err: any, results2: any) {
       results = results.map((item: any) => {
         let isActive = false;
@@ -123,6 +130,43 @@ app.post("/getMessages", (req, res) => {
       res.json(results)
     });
   });
+})
+
+app.post("/addMessage", (req, res) => {
+  const { messageContent, username } = req.body
+  if (!messageContent && !username) {
+    return res.json({
+      flag: false,
+      message: '系统错误!',
+    })
+  }
+  const data = {
+    messageContent,
+    username,
+    time: new Date().getTime().toString()
+  }
+  Messages.create(data, (err: any, results: any) => {
+    res.json({
+      flag: !err,
+      message: err ? '系统错误!' : '留言成功!',
+    })
+  })
+})
+
+app.post("/deleteMessage", (req, res) => {
+  const { _id } = req.body
+  if (!_id) {
+    return res.json({
+      flag: false,
+      message: '系统错误!',
+    })
+  }
+  Messages.remove({ _id: mongoose.Types.ObjectId(_id) }, (err: any) => {
+    res.json({
+      flag: !err,
+      message: err ? '系统错误!' : '删除成功!',
+    })
+  })
 })
 
 app.post("/messageLike", (req, res) => {
