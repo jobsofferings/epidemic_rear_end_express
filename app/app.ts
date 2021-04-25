@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import mongoClient from './mongoClient/index';
 import { ChinaDayAddList, ChinaDayList, ForeignList, ProvinceCompare } from "./reptile/Schema";
 import { Messages, User, MessageLike } from './reptile/UserSchema';
+import { News } from './reptile/NewsSchema';
 import request from 'request';
 
 const app: express.Application = express();
@@ -26,6 +27,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+// 用户部分
 app.post("/login", (req, res) => {
   const { email, password } = req.body
   const where = { email, password };
@@ -99,6 +101,7 @@ app.post("/sign", (req, res) => {
   });
 })
 
+// 留言部分
 app.post("/getMessages", (req, res) => {
   const { email } = req.body
   const where = {};
@@ -198,6 +201,41 @@ app.post("/messageLike", (req, res) => {
   });
 })
 
+// 新闻部分
+app.post("/article", (req, res) => {
+  const { offset, limit, key } = req.body
+  const where = {
+    $or: [
+      { title: { $regex: new RegExp(key, 'i') } }
+    ]
+  };
+  const set = { _id: 0 };
+  News.find(where).countDocuments().then((total: number) => {
+    News.find(where, set).skip(offset).limit(parseInt(limit)).exec((err: Error, data: any) => {
+      return res.status(200).json({
+        result: 0,
+        message: '请求成功',
+        total,
+        data,
+      })
+    })
+  });
+})
+
+app.post("/articleDetail", (req, res) => {
+  const { id } = req.body
+  const where = { id };
+  const set = { _id: 0 };
+  News.find(where, set, {}, function (err: any, results: any) {
+    if (err) {
+      res.end('Error');
+    } else {
+      res.send(results[0])
+    }
+  });
+})
+
+// 疫情部分
 app.post("/getChinaDayList", (req, res) => {
   const where = {};
   const set = { _id: 0, __v: 0 };
