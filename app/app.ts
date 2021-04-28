@@ -10,7 +10,7 @@ import { News } from './reptile/NewsSchema';
 import request from 'request';
 
 const app: express.Application = express();
-const port = 5000;
+const port = 4397;
 const ALLOW_ORIGIN_LIST = ['http://localhost:3000', 'http://www.jobsofferings.cn'];
 
 app.all('*', function (req, res, next) {
