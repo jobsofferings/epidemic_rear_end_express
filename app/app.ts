@@ -137,7 +137,7 @@ app.post("/getMessages", (req, res) => {
 
 app.post("/addMessage", (req, res) => {
   const { messageContent, username } = req.body
-  if (!messageContent && !username) {
+  if (!messageContent || !username) {
     return res.json({
       flag: false,
       message: '系统错误!',
