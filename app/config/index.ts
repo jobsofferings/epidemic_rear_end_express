@@ -55,7 +55,7 @@ export const getPredictedNumber = (xList: number[], yList: number[], x: number) 
   let ftheta1 = 0
   let error0 = 0
   let error1 = 0
-  let epsilon = 0.0001
+  let epsilon = 0.005
   const f = (xList: number) => ftheta1 * xList + ftheta0
   let fresult0 = []
   let fresult1 = []
@@ -80,6 +80,10 @@ export const getPredictedNumber = (xList: number[], yList: number[], x: number) 
       error0 = error1
     }
   }
+  console.log(x);
+  console.log(ftheta0);
+  console.log(ftheta1);
+  console.log(x * ftheta1 + ftheta0);
   return x * ftheta1 + ftheta0;
 }
 
